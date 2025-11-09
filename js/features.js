@@ -1,363 +1,181 @@
-/*
-  ============================================
-  FEATURES & LOGIC
-  ============================================
-  
-  This file contains the main app features:
-  - Search functionality
-  - Filter functionality
-  - Sort functionality
-  - Add new game
-  - Statistics calculation
-  
-  ============================================
-*/
+(function () {
+  /**
+   * features.js
+   * Implements search, filter and basic add-game wiring.
+   *
+   * Relies on:
+   * - Storage APIs (adapted at runtime)
+   * - UI area ids:
+   *   - #gc-search-container
+   *   - #gc-filters
+   *   - #gc-games-list
+   *
+   * Exposes window.Features.init(options)
+   *
+   * options:
+   *  - getState(): ()=>state object { games: [...] }
+   *  - setState(newState): ()=>Promise
+   *  - render(): ()=>void  (called after filters change)
+   */
 
-// ==================== SEARCH FUNCTION ====================
-const searchGames = (games, searchTerm) => {
-  if (!searchTerm || !APP_CONFIG.FEATURES.ENABLE_SEARCH) {
-    return games;
-  }
-  
-  const term = searchTerm.toLowerCase().trim();
-  
-  return games.filter(game => {
-    const nameMatch = game.name.toLowerCase().includes(term);
-    const genreMatch = game.genre.toLowerCase().includes(term);
-    const descMatch = game.desc && game.desc.toLowerCase().includes(term);
-    
-    return nameMatch || genreMatch || descMatch;
-  });
-};
-
-
-// ==================== FILTER FUNCTION ====================
-const filterGames = (games, filter) => {
-  if (!APP_CONFIG.FEATURES.ENABLE_FILTERS || filter === 'all') {
-    return games;
-  }
-  
-  return games.filter(game => game.status === filter);
-};
-
-
-// ==================== SORT FUNCTION ====================
-const sortGames = (games, sortBy) => {
-  if (!APP_CONFIG.FEATURES.ENABLE_SORTING) {
-    return games;
-  }
-  
-  const sorted = [...games];
-  
-  switch(sortBy) {
-    case 'name':
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-      
-    case 'fps':
-      sorted.sort((a, b) => {
-        // Extract max FPS from "30-60" format
-        const aFps = parseInt(a.fps.split('-')[1] || a.fps.split('-')[0] || 0);
-        const bFps = parseInt(b.fps.split('-')[1] || b.fps.split('-')[0] || 0);
-        return bFps - aFps; // Descending order
-      });
-      break;
-      
-    case 'rating':
-      sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      break;
-      
-    case 'tier':
-    default:
-      const tierOrder = { 'S': 0, 'A': 1, 'B': 2, 'C': 3, 'R': 4 };
-      sorted.sort((a, b) => {
-        if (tierOrder[a.tier] !== tierOrder[b.tier]) {
-          return tierOrder[a.tier] - tierOrder[b.tier];
-        }
-        return a.name.localeCompare(b.name);
-      });
-      break;
-  }
-  
-  return sorted;
-};
-
-
-// ==================== CALCULATE STATISTICS ====================
-const calculateStats = (games) => {
-  const total = games.length;
-  const not_downloaded = games.filter(g => g.status === APP_CONFIG.STATUS.NOT_DOWNLOADED).length;
-  const downloaded = games.filter(g => g.status === APP_CONFIG.STATUS.DOWNLOADED).length;
-  const playing = games.filter(g => g.status === APP_CONFIG.STATUS.PLAYING).length;
-  const completed = games.filter(g => g.status === APP_CONFIG.STATUS.COMPLETED).length;
-  const favorite = games.filter(g => g.status === APP_CONFIG.STATUS.FAVORITE).length;
-  
-  const completedCount = completed + favorite;
-  const completionPercent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
-  
-  return {
-    total,
-    not_downloaded,
-    downloaded,
-    playing,
-    completed,
-    favorite,
-    completionPercent
-  };
-};
-
-
-// ==================== UPDATE GAME STATUS ====================
-const updateGameStatus = (games, gameId) => {
-  return games.map(game => {
-    if (game.id === gameId) {
-      const currentIndex = APP_CONFIG.STATUS_CYCLE.indexOf(game.status);
-      const nextIndex = (currentIndex + 1) % APP_CONFIG.STATUS_CYCLE.length;
-      const nextStatus = APP_CONFIG.STATUS_CYCLE[nextIndex];
-      
-      return { ...game, status: nextStatus };
+  function safeCall(fn) {
+    try {
+      return fn();
+    } catch (e) {
+      console.warn("features.js safeCall error", e);
     }
-    return game;
-  });
-};
-
-
-// ==================== UPDATE GAME RATING ====================
-const updateGameRating = (games, gameId, rating) => {
-  if (!APP_CONFIG.FEATURES.ENABLE_RATINGS) {
-    return games;
   }
-  
-  return games.map(game => 
-    game.id === gameId ? { ...game, rating } : game
-  );
-};
 
+  function createSearchInput(onChange) {
+    const input = document.createElement("input");
+    input.type = "search";
+    input.placeholder = "Search games...";
+    input.className = "gc-search";
+    input.addEventListener("input", (e) => onChange(e.target.value));
+    return input;
+  }
 
-// ==================== UPDATE GAME NOTES ====================
-const updateGameNotes = (games, gameId, notes) => {
-  if (!APP_CONFIG.FEATURES.ENABLE_NOTES) {
-    return games;
+  function extractGenres(games) {
+    const set = new Set();
+    (games || []).forEach((g) => {
+      if (g.genre) set.add(g.genre);
+    });
+    return Array.from(set).sort();
   }
-  
-  // Validate notes length
-  const trimmedNotes = notes.trim();
-  if (trimmedNotes.length > APP_CONFIG.VALIDATION.MAX_NOTES_LENGTH) {
-    alert(`Notes too long! Maximum ${APP_CONFIG.VALIDATION.MAX_NOTES_LENGTH} characters.`);
-    return games;
-  }
-  
-  return games.map(game => 
-    game.id === gameId ? { ...game, notes: trimmedNotes } : game
-  );
-};
 
+  function init({ getState, setState, render }) {
+    const searchContainer = document.getElementById("gc-search-container");
+    const filtersContainer = document.getElementById("gc-filters");
+    const gamesList = document.getElementById("gc-games-list");
 
-// ==================== DELETE GAME ====================
-const deleteGame = (games, gameId) => {
-  if (!APP_CONFIG.FEATURES.ENABLE_DELETE_GAME) {
-    return games;
-  }
-  
-  // Don't allow deleting default games (id < 1000)
-  const game = games.find(g => g.id === gameId);
-  if (game && game.id < 1000) {
-    alert('Cannot delete default games!');
-    return games;
-  }
-  
-  if (!window.confirm(`Delete "${game.name}"? This cannot be undone.`)) {
-    return games;
-  }
-  
-  return games.filter(g => g.id !== gameId);
-};
+    let currentQuery = "";
+    let currentTier = "";
+    let currentGenre = "";
+    let currentSort = "default";
 
+    function applyFilters(games) {
+      let out = (games || []).slice();
+      if (currentQuery) {
+        const q = currentQuery.toLowerCase();
+        out = out.filter((g) => (g.name || "").toLowerCase().includes(q) || (g.desc || "").toLowerCase().includes(q));
+      }
+      if (currentTier) out = out.filter((g) => g.tier === currentTier);
+      if (currentGenre) out = out.filter((g) => g.genre === currentGenre);
 
-// ==================== ADD NEW GAME ====================
-const addNewGame = (games, newGameData) => {
-  if (!APP_CONFIG.FEATURES.ENABLE_ADD_GAME) {
-    console.error('Add game feature is disabled');
-    return games;
-  }
-  
-  // Validate required fields
-  if (!newGameData.name || !newGameData.name.trim()) {
-    alert('Game name is required!');
-    return games;
-  }
-  
-  if (newGameData.name.length > APP_CONFIG.VALIDATION.MAX_GAME_NAME_LENGTH) {
-    alert(`Game name too long! Maximum ${APP_CONFIG.VALIDATION.MAX_GAME_NAME_LENGTH} characters.`);
-    return games;
-  }
-  
-  // Create new game object
-  const newGame = {
-    id: Date.now(), // Use timestamp as unique ID
-    name: newGameData.name.trim(),
-    genre: newGameData.genre.trim() || 'Unknown',
-    fps: newGameData.fps.trim() || 'N/A',
-    tier: newGameData.tier || APP_CONFIG.DEFAULTS.NEW_GAME.tier,
-    priority: newGameData.priority || APP_CONFIG.DEFAULTS.NEW_GAME.priority,
-    trailer: newGameData.trailer.trim() || '',
-    desc: newGameData.desc.trim() || '',
-    hours: newGameData.hours.trim() || '',
-    icon: newGameData.icon || APP_CONFIG.DEFAULTS.NEW_GAME.icon,
-    status: APP_CONFIG.DEFAULTS.NEW_GAME.status,
-    rating: APP_CONFIG.DEFAULTS.NEW_GAME.rating,
-    notes: APP_CONFIG.DEFAULTS.NEW_GAME.notes
-  };
-  
-  console.log('Adding new game:', newGame);
-  return [...games, newGame];
-};
+      if (currentSort === "name") out.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      else if (currentSort === "hours") out.sort((a, b) => parseFloat(a.hours) - parseFloat(b.hours));
+      else if (currentSort === "priority") out.sort((a, b) => {
+        const map = { HIGH: 1, MEDIUM: 2, LOW: 3 };
+        return (map[a.priority] || 99) - (map[b.priority] || 99);
+      });
 
+      return out;
+    }
 
-// ==================== VALIDATE GAME DATA ====================
-const validateGameData = (gameData) => {
-  const errors = [];
-  
-  // Check name
-  if (!gameData.name || gameData.name.trim().length < APP_CONFIG.VALIDATION.MIN_GAME_NAME_LENGTH) {
-    errors.push('Game name is required');
+    // mount search
+    if (searchContainer) {
+      const input = createSearchInput((value) => {
+        currentQuery = value;
+        safeCall(render);
+      });
+      searchContainer.innerHTML = "";
+      searchContainer.appendChild(input);
+    }
+
+    // mount filters (tier and genre selects are expected to exist)
+    if (filtersContainer) {
+      // If filters created by UIComponents are present, wire events
+      const tierEl = document.getElementById("gc-filter-tier");
+      const genreEl = document.getElementById("gc-filter-genre");
+      const sortEl = document.getElementById("gc-sort-by");
+
+      if (tierEl) tierEl.addEventListener("change", (e) => {
+        currentTier = e.target.value || "";
+        safeCall(render);
+      });
+      if (genreEl) genreEl.addEventListener("change", (e) => {
+        currentGenre = e.target.value || "";
+        safeCall(render);
+      });
+      if (sortEl) sortEl.addEventListener("change", (e) => {
+        currentSort = e.target.value || "default";
+        safeCall(render);
+      });
+
+      // Provide a method to populate genres dynamically
+      window.Features = window.Features || {};
+      window.Features.populateGenres = function () {
+        const state = getState();
+        const genres = extractGenres(state.games || []);
+        const genreSel = document.getElementById("gc-filter-genre");
+        if (!genreSel) return;
+        // clear existing (keep first option)
+        const first = genreSel.querySelector("option");
+        genreSel.innerHTML = "";
+        if (first) genreSel.appendChild(first);
+        genres.forEach((g) => genreSel.appendChild(Object.assign(document.createElement("option"), { value: g, textContent: g })));
+      };
+    }
+
+    // expose quick filter application
+    window.Features = Object.assign(window.Features || {}, {
+      applyFiltersTo(games) {
+        return applyFilters(games);
+      },
+      getCurrentFilters() {
+        return { q: currentQuery, tier: currentTier, genre: currentGenre, sort: currentSort };
+      },
+      setQuery(q) {
+        currentQuery = q || "";
+        safeCall(render);
+      },
+      reset() {
+        currentQuery = "";
+        currentTier = "";
+        currentGenre = "";
+        currentSort = "default";
+        const tierEl = document.getElementById("gc-filter-tier");
+        const genreEl = document.getElementById("gc-filter-genre");
+        const sortEl = document.getElementById("gc-sort-by");
+        if (tierEl) tierEl.value = "";
+        if (genreEl) genreEl.value = "";
+        if (sortEl) sortEl.value = "default";
+        safeCall(render);
+      },
+    });
+
+    // basic add-game form (non-serialized, simple UI)
+    // If #gc-add-game exists, wire it
+    const addForm = document.getElementById("gc-add-game");
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(addForm);
+        const newGame = {
+          id: Date.now(),
+          name: fd.get("name"),
+          genre: fd.get("genre"),
+          fps: fd.get("fps") || "",
+          tier: fd.get("tier") || "",
+          priority: fd.get("priority") || "LOW",
+          trailer: fd.get("trailer") || "",
+          desc: fd.get("desc") || "",
+          hours: fd.get("hours") || "",
+          icon: fd.get("icon") || "gamepad",
+          status: "not_downloaded",
+        };
+        const state = getState();
+        state.games = state.games || [];
+        state.games.push(newGame);
+        setState(state).then(() => {
+          if (window.Features.populateGenres) window.Features.populateGenres();
+          safeCall(render);
+          addForm.reset();
+        });
+      });
+    }
   }
-  
-  if (gameData.name && gameData.name.length > APP_CONFIG.VALIDATION.MAX_GAME_NAME_LENGTH) {
-    errors.push(`Game name must be less than ${APP_CONFIG.VALIDATION.MAX_GAME_NAME_LENGTH} characters`);
-  }
-  
-  // Check genre
-  if (gameData.genre && gameData.genre.length > APP_CONFIG.VALIDATION.MAX_GENRE_LENGTH) {
-    errors.push(`Genre must be less than ${APP_CONFIG.VALIDATION.MAX_GENRE_LENGTH} characters`);
-  }
-  
-  // Check description
-  if (gameData.desc && gameData.desc.length > APP_CONFIG.VALIDATION.MAX_DESC_LENGTH) {
-    errors.push(`Description must be less than ${APP_CONFIG.VALIDATION.MAX_DESC_LENGTH} characters`);
-  }
-  
-  // Check trailer URL
-  if (gameData.trailer && !isValidURL(gameData.trailer)) {
-    errors.push('Trailer must be a valid URL');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-};
 
-
-// ==================== VALIDATE URL ====================
-const isValidURL = (string) => {
-  try {
-    new URL(string);
-    return true;
-  } catch (_) {
-    return false;
-  }
-};
-
-
-// ==================== GET NEXT AVAILABLE ID ====================
-const getNextGameId = (games) => {
-  if (games.length === 0) return 1000;
-  
-  const maxId = Math.max(...games.map(g => g.id));
-  return maxId < 1000 ? 1000 : maxId + 1;
-};
-
-
-// Make all functions available globally
-window.GameFeatures = {
-  searchGames,
-  filterGames,
-  sortGames,
-  calculateStats,
-  updateGameStatus,
-  updateGameRating,
-  updateGameNotes,
-  deleteGame,
-  addNewGame,
-  validateGameData,
-  isValidURL,
-  getNextGameId
-};
-
-/*
-  ============================================
-  HOW TO USE THESE FUNCTIONS:
-  ============================================
-  
-  Import in your app:
-  const { searchGames, filterGames, sortGames } = window.GameFeatures;
-  
-  Search games:
-  const filtered = searchGames(games, 'batman');
-  
-  Filter by status:
-  const filtered = filterGames(games, 'completed');
-  
-  Sort games:
-  const sorted = sortGames(games, 'name');
-  
-  Calculate stats:
-  const stats = calculateStats(games);
-  
-  Update status:
-  const updated = updateGameStatus(games, gameId);
-  
-  Update rating:
-  const updated = updateGameRating(games, gameId, 5);
-  
-  Update notes:
-  const updated = updateGameNotes(games, gameId, 'Great game!');
-  
-  Delete game:
-  const updated = deleteGame(games, gameId);
-  
-  Add new game:
-  const newGameData = { name: 'New Game', genre: 'Action', ... };
-  const updated = addNewGame(games, newGameData);
-  
-  Validate game data:
-  const { isValid, errors } = validateGameData(gameData);
-  if (!isValid) {
-    console.error('Validation errors:', errors);
-  }
-  
-  ============================================
-  COMBINING FUNCTIONS:
-  ============================================
-  
-  Apply search, filter, and sort together:
-  
-  let result = games;
-  result = searchGames(result, searchTerm);
-  result = filterGames(result, filter);
-  result = sortGames(result, sortBy);
-  
-  ============================================
-  CUSTOMIZATION:
-  ============================================
-  
-  Add new search fields:
-  - Edit searchGames() function
-  - Add more checks (e.g., search by hours, tier, etc.)
-  
-  Add new sort options:
-  - Edit sortGames() function
-  - Add new case in switch statement
-  
-  Change validation rules:
-  - Edit validateGameData() function
-  - Modify error messages and conditions
-  
-  Add new features:
-  - Create new function following same pattern
-  - Add to window.GameFeatures export
-  - Use in app.js
-  
-  ============================================
-*/
+  window.Features = window.Features || {};
+  window.Features.init = init;
+})();
