@@ -1,0 +1,311 @@
+/*
+  ============================================
+  GAMING CHECKLIST - STYLES
+  ============================================
+  
+  This file contains ALL visual styling.
+  
+  SECTIONS:
+  1. Base Styles (resets, fonts)
+  2. Loading Screen
+  3. Install Prompt
+  4. Animations
+  5. Utility Classes
+  
+  ============================================
+*/
+
+/* ==================== 1. BASE STYLES ==================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+               Oxygen, Ubuntu, Cantarell, sans-serif;
+  overflow-x: hidden;
+  touch-action: pan-y;
+  background: #1e1b4b;
+}
+
+/* Prevent pull-to-refresh on mobile */
+body {
+  overscroll-behavior-y: contain;
+}
+
+
+/* ==================== 2. LOADING SCREEN ==================== */
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  color: white;
+}
+
+.loading-screen.hide {
+  animation: fadeOut 0.5s forwards;
+}
+
+.loading-screen h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.loading-screen p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+
+/* ==================== 3. INSTALL PROMPT ==================== */
+
+.install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  display: none;
+  z-index: 9999;
+  animation: slideUp 0.3s ease;
+}
+
+.install-prompt.show {
+  display: block;
+}
+
+.install-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.install-icon {
+  font-size: 32px;
+}
+
+.install-text h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.install-text p {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.install-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.install-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#installBtn {
+  background: white;
+  color: #764ba2;
+}
+
+#dismissBtn {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+
+/* ==================== 4. ANIMATIONS ==================== */
+
+@keyframes spin {
+  to { 
+    transform: rotate(360deg); 
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* ==================== 5. UTILITY CLASSES ==================== */
+
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease;
+}
+
+/* Smooth transitions */
+.smooth-transition {
+  transition: all 0.3s ease;
+}
+
+/* Active state for touch devices */
+.touchable:active {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+/* No select (prevent text selection on buttons) */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Scrollbar styling (for webkit browsers) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.7);
+}
+
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+/* Mobile-first approach (default styles are for mobile) */
+
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .install-prompt {
+    max-width: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  body {
+    overflow-y: scroll; /* Always show scrollbar to prevent jump */
+  }
+}
+
+
+/* ==================== DARK MODE OVERRIDES ==================== */
+
+/* These are applied when dark mode is active in the app */
+.dark-mode {
+  /* Dark mode styles are handled in Tailwind classes */
+  /* But you can add custom overrides here if needed */
+}
+
+
+/*
+  ============================================
+  HOW TO MODIFY THIS FILE:
+  ============================================
+  
+  CHANGE COLORS:
+  - Main gradient: Search for "667eea" and "764ba2"
+  - Replace with your colors
+  
+  CHANGE ANIMATIONS:
+  - Loading spinner speed: Change "1s" in @keyframes spin
+  - Fade speed: Change "0.5s" in fadeOut
+  
+  ADD NEW STYLES:
+  - Add them in a new section at the bottom
+  - Use descriptive class names
+  - Add comments explaining what they do
+  
+  REMOVE FEATURES:
+  - Comment out or delete the section you don't need
+  - Example: Remove install prompt styles if not using
+  
+  ============================================
+  WHAT NOT TO CHANGE:
+  ============================================
+  
+  - Don't remove * (reset) styles
+  - Don't remove animations (app uses them)
+  - Keep base body styles
+  
+  ============================================
+*/

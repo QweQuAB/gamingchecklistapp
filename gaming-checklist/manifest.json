@@ -1,0 +1,241 @@
+{
+  "name": "Q's Gaming Checklist",
+  "short_name": "GameList",
+  "description": "Track your gaming backlog and progress with ease",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  
+  "categories": [
+    "games",
+    "entertainment",
+    "productivity",
+    "lifestyle"
+  ],
+  
+  "screenshots": [
+    {
+      "src": "/assets/screenshot1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "label": "Main game list view"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "Add Game",
+      "short_name": "Add",
+      "description": "Quickly add a new game",
+      "url": "/?action=add",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Playing",
+      "short_name": "Playing",
+      "description": "View games you're currently playing",
+      "url": "/?filter=playing",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  
+  "prefer_related_applications": false,
+  
+  "related_applications": [],
+  
+  "iarc_rating_id": "",
+  
+  "features": [
+    "cross-platform",
+    "offline",
+    "installable",
+    "lightweight"
+  ]
+}
+
+/*
+  ============================================
+  MANIFEST.JSON EXPLANATION
+  ============================================
+  
+  This file tells the browser how to install
+  and display your app.
+  
+  ============================================
+  KEY FIELDS:
+  ============================================
+  
+  name: Full app name (shown on splash screen)
+  short_name: Short name (shown under icon)
+  description: App description
+  start_url: URL to open when app launches
+  display: How app appears (standalone = no browser UI)
+  background_color: Splash screen background
+  theme_color: Top bar color (Android)
+  orientation: Preferred screen orientation
+  icons: App icons (MUST be PNG, not JPG)
+  
+  ============================================
+  CUSTOMIZATION:
+  ============================================
+  
+  Change app name:
+  - Edit "name" and "short_name"
+  
+  Change colors:
+  - Edit "background_color" and "theme_color"
+  - Use hex codes (#rrggbb)
+  
+  Change icon paths:
+  - Edit "src" in icons array
+  - Make sure files exist!
+  
+  Add more icons:
+  - Add new objects to icons array
+  - Common sizes: 72, 96, 128, 144, 152, 192, 384, 512
+  
+  Change display mode:
+  - Options: "fullscreen", "standalone", "minimal-ui", "browser"
+  - "standalone" recommended for app-like feel
+  
+  Change orientation:
+  - Options: "portrait", "landscape", "any"
+  - "portrait-primary" locks to portrait
+  
+  ============================================
+  SHORTCUTS:
+  ============================================
+  
+  Shortcuts appear when long-pressing app icon.
+  They allow quick access to specific features.
+  
+  To add a shortcut:
+  1. Add object to shortcuts array
+  2. Specify name, url, and icon
+  3. URL can include query params (?filter=playing)
+  
+  ============================================
+  SHARE TARGET:
+  ============================================
+  
+  Allows other apps to share content to your app.
+  Example: Share a game link from browser to your app.
+  
+  Note: Requires backend implementation to work.
+  
+  ============================================
+  CATEGORIES:
+  ============================================
+  
+  Helps app stores categorize your app.
+  Choose relevant categories from:
+  - books, business, education, entertainment
+  - finance, fitness, food, games, government
+  - health, kids, lifestyle, magazines, medical
+  - music, navigation, news, personalization
+  - photo, politics, productivity, security
+  - shopping, social, sports, travel, utilities
+  - weather
+  
+  ============================================
+  TESTING:
+  ============================================
+  
+  Validate manifest:
+  1. Open DevTools (F12)
+  2. Go to Application tab
+  3. Click Manifest
+  4. Check for errors
+  
+  Test install:
+  1. Deploy to HTTPS server
+  2. Open in Chrome/Edge on Android
+  3. Look for install prompt
+  4. Install and test
+  
+  ============================================
+  COMMON ERRORS:
+  ============================================
+  
+  "No manifest detected":
+  - Check file is named exactly "manifest.json"
+  - Check it's in root folder
+  - Check link tag in index.html
+  
+  "Icons not showing":
+  - Icons MUST be PNG format
+  - Check file paths are correct
+  - Check files actually exist
+  - Try clearing cache
+  
+  "Install prompt not showing":
+  - Must be on HTTPS
+  - Service worker must be registered
+  - manifest.json must be valid
+  - User must engage with site first
+  
+  ============================================
+  FILE LOCATION:
+  ============================================
+  
+  This file MUST be in the root folder:
+  
+  ✅ CORRECT:
+  /manifest.json
+  
+  ❌ WRONG:
+  /js/manifest.json
+  /css/manifest.json
+  
+  ============================================
+  LINKED IN INDEX.HTML:
+  ============================================
+  
+  Make sure index.html has this line in <head>:
+  <link rel="manifest" href="/manifest.json">
+  
+  ============================================
+*/
