@@ -268,12 +268,214 @@ body {
 }
 
 
+/* ==================== 6. APP STYLES ==================== */
+
+:root {
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --bg: #1e1b4b;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --text: #ffffff;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  color: var(--text);
+  background: var(--bg);
+  padding: 20px;
+}
+
+#app {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.gc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.gc-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.gc-subtitle {
+  color: var(--text-muted);
+}
+
+.gc-stats {
+  margin-bottom: 30px;
+}
+
+.gc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.gc-stat {
+  background: var(--card-bg);
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.gc-stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.gc-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.gc-filters {
+  margin-bottom: 30px;
+}
+
+.gc-filter-row {
+  display: flex;
+  gap: 10px;
+}
+
+.gc-select, .gc-search {
+  background: var(--card-bg);
+  color: white;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  outline: none;
+}
+
+.gc-search {
+  width: 200px;
+}
+
+.gc-games-list {
+  display: grid;
+  gap: 20px;
+}
+
+.gc-game-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.2s;
+}
+
+.gc-game-card:hover {
+  transform: translateY(-2px);
+}
+
+.gc-game-card-header {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.gc-icon-svg svg, .gc-icon-emoji {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.gc-game-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.gc-game-sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.gc-game-desc {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.gc-game-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gc-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.gc-badge-hours {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.gc-priority-high { color: #ef4444; border: 1px solid #ef4444; }
+.gc-priority-medium { color: #f59e0b; border: 1px solid #f59e0b; }
+.gc-priority-low { color: #10b981; border: 1px solid #10b981; }
+
+.gc-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.gc-btn:hover {
+  opacity: 0.8;
+}
+
+.gc-btn-primary { background: var(--primary); color: white; }
+
+.gc-status-btn {
+  text-transform: capitalize;
+  min-width: 120px;
+}
+
+.gc-status-not_downloaded { background: #64748b; color: white; }
+.gc-status-playing { background: #3b82f6; color: white; }
+.gc-status-completed { background: #10b981; color: white; }
+
+.gc-btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.gc-fav-btn.is-fav {
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.gc-hidden {
+  display: none !important;
+}
+
 /* ==================== DARK MODE OVERRIDES ==================== */
 
 /* These are applied when dark mode is active in the app */
 .dark-mode {
-  /* Dark mode styles are handled in Tailwind classes */
-  /* But you can add custom overrides here if needed */
+  /* Dark mode styles are handled via variables above */
 }
 
 

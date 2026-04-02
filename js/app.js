@@ -23,6 +23,7 @@
       async loadAll() {
         if (!S) return null;
         // Try common method names
+        if (typeof S.loadGames === "function") return await S.loadGames();
         if (typeof S.load === "function") return await S.load();
         if (typeof S.getAllGames === "function") return await S.getAllGames();
         if (typeof S.getData === "function") return await S.getData();
@@ -36,6 +37,7 @@
           console.warn("No StorageManager found - skipping save");
           return;
         }
+        if (typeof S.saveGames === "function") return await S.saveGames(payload);
         if (typeof S.save === "function") return await S.save(payload);
         if (typeof S.setData === "function") return await S.setData(payload);
         if (typeof S.set === "function") return await S.set("games", payload);
@@ -114,7 +116,8 @@
 
     const header = window.UIComponents && window.UIComponents.createHeader ? window.UIComponents.createHeader() : document.createElement("header");
     const stats = window.UIComponents && window.UIComponents.createStatsContainer ? window.UIComponents.createStatsContainer() : document.createElement("section");
-    const filters = window.UIComponents && window.UIComponents.createFiltersContainer ? window.UIComponents.createFiltersContainer((window.CONFIG && window.CONFIG.TIERS) || [], []) : document.createElement("section");
+    const tiersArray = window.CONFIG && window.CONFIG.TIERS ? Object.keys(window.CONFIG.TIERS).map((k) => ({ key: k, label: window.CONFIG.TIERS[k].label || k })) : [];
+    const filters = window.UIComponents && window.UIComponents.createFiltersContainer ? window.UIComponents.createFiltersContainer(tiersArray, []) : document.createElement("section");
     const modal = window.UIComponents && window.UIComponents.createModal ? window.UIComponents.createModal() : document.createElement("div");
     const gamesList = document.createElement("section");
     gamesList.id = "gc-games-list";

@@ -1,3 +1,4 @@
+(function () {
 /*
  * service-worker.js
  * Lightweight service worker for offline caching.
